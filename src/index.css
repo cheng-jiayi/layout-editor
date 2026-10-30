@@ -1,0 +1,369 @@
+:root {
+  --bg: #1e1e24;
+  --panel: #26262e;
+  --panel-2: #2f2f3a;
+  --border: #3a3a46;
+  --text: #e8e8ef;
+  --text-dim: #9a9aae;
+  --accent: #5b8cff;
+  --accent-dim: #3a5bbf;
+  --danger: #ff5b6e;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+/* ---------- App shell ---------- */
+.app {
+  display: grid;
+  grid-template-columns: 220px 1fr 260px;
+  grid-template-rows: 48px 1fr;
+  grid-template-areas:
+    "toolbar toolbar toolbar"
+    "layers canvas props";
+  height: 100vh;
+  width: 100vw;
+}
+
+.toolbar {
+  grid-area: toolbar;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+
+.toolbar .spacer {
+  flex: 1;
+}
+
+.toolbar .title {
+  font-weight: 600;
+  margin-right: 12px;
+}
+
+.panel {
+  background: var(--panel);
+  overflow-y: auto;
+}
+
+.panel.layers {
+  grid-area: layers;
+  border-right: 1px solid var(--border);
+}
+
+.panel.props {
+  grid-area: props;
+  border-left: 1px solid var(--border);
+}
+
+.panel h3 {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  margin: 14px 12px 8px;
+}
+
+/* ---------- Canvas ---------- */
+.canvas-area {
+  grid-area: canvas;
+  overflow: auto;
+  background: #15151a;
+  background-image:
+    linear-gradient(45deg, #1a1a20 25%, transparent 25%),
+    linear-gradient(-45deg, #1a1a20 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #1a1a20 75%),
+    linear-gradient(-45deg, transparent 75%, #1a1a20 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+  padding: 40px;
+}
+
+/* Side-by-side device frames (desktop / tablet / mobile). */
+.frames {
+  display: flex;
+  align-items: flex-start;
+  gap: 48px;
+  width: max-content;
+  margin: 0 auto;
+}
+
+.frame {
+  flex-shrink: 0;
+}
+
+.frame-label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding: 0 2px;
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 600;
+}
+.frame-label.active {
+  color: var(--accent);
+}
+.frame-label .frame-dim {
+  font-weight: 400;
+  font-size: 11px;
+}
+
+.page {
+  position: relative;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  flex-shrink: 0;
+  outline: 2px solid transparent;
+  transition: outline-color 0.12s;
+}
+.page.active {
+  outline-color: var(--accent);
+}
+
+/* Portrait device viewport for tablet/mobile preview — scrolls internally. */
+.device-screen {
+  overflow: auto;
+  border-radius: 18px;
+  border: 10px solid #0c0c10;
+  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.55);
+  background: #fff;
+  flex-shrink: 0;
+}
+.device-screen .page {
+  box-shadow: none;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+.btn:hover {
+  background: #383846;
+}
+.btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+.btn.primary:hover {
+  background: #6f9bff;
+}
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ---------- Selection handles ---------- */
+.handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: white;
+  border: 1.5px solid var(--accent);
+  border-radius: 2px;
+  z-index: 100000;
+}
+.handle.rotate {
+  border-radius: 50%;
+  cursor: grab;
+  background: var(--accent);
+}
+.selection-box {
+  position: absolute;
+  border: 1.5px solid var(--accent);
+  pointer-events: none;
+  z-index: 99999;
+}
+
+/* ---------- Layers list ---------- */
+.layer-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+}
+.layer-row:hover {
+  background: var(--panel-2);
+}
+.layer-row.selected {
+  background: var(--accent-dim);
+  border-left-color: var(--accent);
+}
+.layer-row .name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.layer-row .icon-btn {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  padding: 2px;
+  font-size: 12px;
+}
+.layer-row .icon-btn:hover {
+  color: var(--text);
+}
+.layer-row .icon-btn:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+.layer-row .drag-handle {
+  color: var(--text-dim);
+  cursor: grab;
+  font-size: 12px;
+  letter-spacing: -1px;
+  user-select: none;
+}
+.layer-row.drop-target {
+  box-shadow: inset 0 2px 0 var(--accent);
+}
+
+/* ---------- Properties form ---------- */
+.field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  font-size: 13px;
+}
+.field label {
+  width: 70px;
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+.field input[type="number"],
+.field input[type="text"],
+.field select,
+.field textarea {
+  flex: 1;
+  width: 100%;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 4px;
+  padding: 5px 6px;
+  font-size: 13px;
+}
+.field.row2 {
+  gap: 6px;
+}
+.field input[type="color"] {
+  width: 36px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: none;
+}
+.empty-hint {
+  padding: 20px 12px;
+  color: var(--text-dim);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* ---------- Breakpoint / override UI ---------- */
+.ov-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-left: 5px;
+  vertical-align: middle;
+}
+.bp-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 12px 4px;
+  padding: 7px 10px;
+  background: var(--accent-dim);
+  border-radius: 6px;
+  font-size: 12px;
+}
+.bp-banner .ov-reset {
+  margin-left: auto;
+  padding: 3px 8px;
+  font-size: 11px;
+}
+.bp-hint {
+  padding: 0 12px 6px;
+  color: var(--text-dim);
+  font-size: 11px;
+  line-height: 1.4;
+}
+.shared-tag {
+  font-size: 9px;
+  background: var(--panel-2);
+  color: var(--text-dim);
+  padding: 2px 5px;
+  border-radius: 4px;
+  margin-left: 6px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* ---------- Toolbar breakpoint switcher ---------- */
+.bp-switch {
+  display: flex;
+  gap: 2px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 2px;
+}
+.bp-switch button {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+.bp-switch button.active {
+  background: var(--accent);
+  color: white;
+}
